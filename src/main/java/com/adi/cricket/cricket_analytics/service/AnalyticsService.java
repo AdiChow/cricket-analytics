@@ -2,6 +2,7 @@ package com.adi.cricket.cricket_analytics.service;
 
 import com.adi.cricket.cricket_analytics.dto.BattingLeaderDto;
 import com.adi.cricket.cricket_analytics.dto.PlayerProfileDto;
+import com.adi.cricket.cricket_analytics.dto.PlayerProfileProjection;
 import com.adi.cricket.cricket_analytics.dto.PlayerSearchDto;
 import com.adi.cricket.cricket_analytics.exception.PlayerNotFoundException;
 import com.adi.cricket.cricket_analytics.repository.DeliveryRepository;
@@ -25,17 +26,11 @@ public class AnalyticsService {
                 .stream()
                 .map(row -> {
 
-            Long playerId =
-                    ((Number) row[0]).longValue();
-
-            String playerName =
-                    (String) row[1];
-
             long runs =
-                    ((Number) row[2]).longValue();
+                    row.getRuns();
 
             long balls =
-                    ((Number) row[3]).longValue();
+                    row.getBallsFaced();
 
             double strikeRate =
                     balls == 0
@@ -48,8 +43,8 @@ public class AnalyticsService {
                     ) / 100.0;
 
             return new BattingLeaderDto(
-                    playerId,
-                    playerName,
+                    row.getPlayerId(),
+                    row.getPlayerName(),
                     runs,
                     balls,
                     strikeRate
@@ -60,25 +55,23 @@ public class AnalyticsService {
             Long playerId
     ) {
 
-        Object[] row =
+        PlayerProfileProjection row =
                 deliveryRepository
                         .getPlayerProfile(
                                 playerId
                         )
-                        .stream()
-                        .findFirst()
                         .orElseThrow(() ->
                                 new PlayerNotFoundException(playerId)
                         );
 
         long matches =
-                ((Number) row[2]).longValue();
+                row.getMatches();
 
         long runs =
-                ((Number) row[3]).longValue();
+                row.getRuns();
 
         long balls =
-                ((Number) row[4]).longValue();
+                row.getBallsFaced();
 
         double strikeRate =
                 balls == 0
@@ -91,8 +84,8 @@ public class AnalyticsService {
                 ) / 100.0;
 
         return new PlayerProfileDto(
-                ((Number) row[0]).longValue(),
-                (String) row[1],
+                row.getPlayerId(),
+                row.getPlayerName(),
                 matches,
                 runs,
                 balls,
@@ -110,8 +103,8 @@ public class AnalyticsService {
                 .stream()
                 .map(row ->
                         new PlayerSearchDto(
-                                ((Number) row[0]).longValue(),
-                                (String) row[1]
+                                row.getPlayerId(),
+                                row.getPlayerName()
                         )
                 )
                 .toList();

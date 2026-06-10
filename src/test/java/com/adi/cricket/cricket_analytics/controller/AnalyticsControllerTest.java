@@ -1,15 +1,19 @@
 package com.adi.cricket.cricket_analytics.controller;
 
+import com.adi.cricket.cricket_analytics.dto.BattingLeaderProjection;
+import com.adi.cricket.cricket_analytics.dto.PlayerProfileProjection;
+import com.adi.cricket.cricket_analytics.dto.PlayerSearchProjection;
 import com.adi.cricket.cricket_analytics.exception.GlobalExceptionHandler;
 import com.adi.cricket.cricket_analytics.repository.DeliveryRepository;
+import com.adi.cricket.cricket_analytics.repository.PlayerRepository;
 import com.adi.cricket.cricket_analytics.service.AnalyticsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Proxy;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -21,9 +25,14 @@ class AnalyticsControllerTest {
     @Test
     void returnsPlayerProfile() throws Exception {
         MockMvc mockMvc = createMockMvc(
-                Collections.singletonList(
-                        new Object[]{42L, "Virat Kohli", 10L, 500L, 400L}
-                )
+                Optional.of(playerProfile(
+                        42L,
+                        "Virat Kohli",
+                        10L,
+                        500L,
+                        400L
+                )),
+                List.of()
         );
 
         mockMvc.perform(get("/api/stats/players/42"))
@@ -38,8 +47,48 @@ class AnalyticsControllerTest {
     }
 
     @Test
+    void returnsBattingLeaderboard() throws Exception {
+        MockMvc mockMvc = createMockMvc(
+                Optional.empty(),
+                List.of(
+                        battingLeader(42L, "Virat Kohli", 500L, 400L),
+                        battingLeader(18L, "Smriti Mandhana", 450L, 375L)
+                )
+        );
+
+        mockMvc.perform(get("/api/stats/top-batters"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$[0].playerId").value(42))
+                .andExpect(jsonPath("$[0].playerName").value("Virat Kohli"))
+                .andExpect(jsonPath("$[0].runs").value(500))
+                .andExpect(jsonPath("$[0].ballsFaced").value(400))
+                .andExpect(jsonPath("$[0].strikeRate").value(125.0))
+                .andExpect(jsonPath("$[1].playerId").value(18))
+                .andExpect(jsonPath("$[1].playerName").value("Smriti Mandhana"))
+                .andExpect(jsonPath("$[1].runs").value(450))
+                .andExpect(jsonPath("$[1].ballsFaced").value(375))
+                .andExpect(jsonPath("$[1].strikeRate").value(120.0));
+    }
+
+    @Test
+    void returnsPlayerSearchResults() throws Exception {
+        MockMvc mockMvc = createMockMvc(
+                Optional.empty(),
+                List.of(),
+                List.of(playerSearchResult(42L, "Virat Kohli"))
+        );
+
+        mockMvc.perform(get("/api/stats/players/search").param("q", "virat"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$[0].playerId").value(42))
+                .andExpect(jsonPath("$[0].playerName").value("Virat Kohli"));
+    }
+
+    @Test
     void returnsNotFoundWhenPlayerProfileDoesNotExist() throws Exception {
-        MockMvc mockMvc = createMockMvc(List.of());
+        MockMvc mockMvc = createMockMvc(Optional.empty(), List.of());
 
         mockMvc.perform(get("/api/stats/players/42"))
                 .andExpect(status().isNotFound())
@@ -53,7 +102,7 @@ class AnalyticsControllerTest {
 
     @Test
     void returnsBadRequestForInvalidPlayerId() throws Exception {
-        MockMvc mockMvc = createMockMvc(List.of());
+        MockMvc mockMvc = createMockMvc(Optional.empty(), List.of());
 
         mockMvc.perform(get("/api/stats/players/not-a-number"))
                 .andExpect(status().isBadRequest())
@@ -68,7 +117,7 @@ class AnalyticsControllerTest {
 
     @Test
     void returnsConsistentBadRequestWhenSearchQueryIsMissing() throws Exception {
-        MockMvc mockMvc = createMockMvc(List.of());
+        MockMvc mockMvc = createMockMvc(Optional.empty(), List.of());
 
         mockMvc.perform(get("/api/stats/players/search"))
                 .andExpect(status().isBadRequest())
@@ -94,16 +143,112 @@ class AnalyticsControllerTest {
                 .andExpect(jsonPath("$.path").value("/api/stats/players/42"));
     }
 
-    private MockMvc createMockMvc(List<Object[]> profileRows) {
+    private MockMvc createMockMvc(
+            Optional<PlayerProfileProjection> profileRow,
+            List<BattingLeaderProjection> battingLeaders
+    ) {
+        return createMockMvc(profileRow, battingLeaders, List.of());
+    }
+
+    private MockMvc createMockMvc(
+            Optional<PlayerProfileProjection> profileRow,
+            List<BattingLeaderProjection> battingLeaders,
+            List<PlayerSearchProjection> searchResults
+    ) {
         DeliveryRepository deliveryRepository = deliveryRepository((methodName) -> {
             if ("getPlayerProfile".equals(methodName)) {
-                return profileRows;
+                return profileRow;
+            }
+            if ("getTopBatters".equals(methodName)) {
+                return battingLeaders;
             }
 
             throw new UnsupportedOperationException("Unexpected repository method: " + methodName);
         });
+        PlayerRepository playerRepository = playerRepository(searchResults);
 
-        return createMockMvc(deliveryRepository);
+        return createMockMvc(deliveryRepository, playerRepository);
+    }
+
+    private PlayerProfileProjection playerProfile(
+            Long playerId,
+            String playerName,
+            Long matches,
+            Long runs,
+            Long ballsFaced
+    ) {
+        return new PlayerProfileProjection() {
+            @Override
+            public Long getPlayerId() {
+                return playerId;
+            }
+
+            @Override
+            public String getPlayerName() {
+                return playerName;
+            }
+
+            @Override
+            public Long getMatches() {
+                return matches;
+            }
+
+            @Override
+            public Long getRuns() {
+                return runs;
+            }
+
+            @Override
+            public Long getBallsFaced() {
+                return ballsFaced;
+            }
+        };
+    }
+
+    private BattingLeaderProjection battingLeader(
+            Long playerId,
+            String playerName,
+            Long runs,
+            Long ballsFaced
+    ) {
+        return new BattingLeaderProjection() {
+            @Override
+            public Long getPlayerId() {
+                return playerId;
+            }
+
+            @Override
+            public String getPlayerName() {
+                return playerName;
+            }
+
+            @Override
+            public Long getRuns() {
+                return runs;
+            }
+
+            @Override
+            public Long getBallsFaced() {
+                return ballsFaced;
+            }
+        };
+    }
+
+    private PlayerSearchProjection playerSearchResult(
+            Long playerId,
+            String playerName
+    ) {
+        return new PlayerSearchProjection() {
+            @Override
+            public Long getPlayerId() {
+                return playerId;
+            }
+
+            @Override
+            public String getPlayerName() {
+                return playerName;
+            }
+        };
     }
 
     private MockMvc createMockMvc(RuntimeException repositoryFailure) {
@@ -111,13 +256,16 @@ class AnalyticsControllerTest {
             throw repositoryFailure;
         });
 
-        return createMockMvc(deliveryRepository);
+        return createMockMvc(deliveryRepository, null);
     }
 
-    private MockMvc createMockMvc(DeliveryRepository deliveryRepository) {
+    private MockMvc createMockMvc(
+            DeliveryRepository deliveryRepository,
+            PlayerRepository playerRepository
+    ) {
         AnalyticsService analyticsService = new AnalyticsService(
                 deliveryRepository,
-                null
+                playerRepository
         );
         AnalyticsController controller = new AnalyticsController(analyticsService);
 
@@ -134,6 +282,24 @@ class AnalyticsControllerTest {
                 DeliveryRepository.class.getClassLoader(),
                 new Class<?>[]{DeliveryRepository.class},
                 (proxy, method, arguments) -> methodHandler.invoke(method.getName())
+        );
+    }
+
+    private PlayerRepository playerRepository(
+            List<PlayerSearchProjection> searchResults
+    ) {
+        return (PlayerRepository) Proxy.newProxyInstance(
+                PlayerRepository.class.getClassLoader(),
+                new Class<?>[]{PlayerRepository.class},
+                (proxy, method, arguments) -> {
+                    if ("searchPlayers".equals(method.getName())) {
+                        return searchResults;
+                    }
+
+                    throw new UnsupportedOperationException(
+                            "Unexpected repository method: " + method.getName()
+                    );
+                }
         );
     }
 
