@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: cricket-analytics
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cricketdb
+    username: cricket
+    password: cricket
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
