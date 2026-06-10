@@ -6,6 +6,10 @@
 
 GitHub Actions runs `./mvnw verify` and builds the Docker image for every pull request and every push to `main`. The workflow validates the build only; it does not publish images or deploy the application.
 
+## Cloud Run Readiness
+
+The application honors Cloud Run's `PORT` environment variable and accepts database configuration through `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. For a production deployment, set `JPA_DDL_AUTO=validate`, `JPA_SHOW_SQL=false`, and an appropriate `DB_MAX_POOL_SIZE`; Cloud SQL connectivity is not configured yet.
+
 ## Docker Compose
 
 Start PostgreSQL and the application from the repository root:
