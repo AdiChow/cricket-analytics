@@ -3,6 +3,8 @@
 .idea
 target
 *.iml
+/frontend/node_modules
+/frontend/dist
 
 # Cricsheet downloads are external input and must not be packaged in the image.
 /*.json

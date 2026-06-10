@@ -6,6 +6,20 @@
 
 GitHub Actions runs `./mvnw verify` and builds the Docker image for every pull request and every push to `main`. The workflow validates the build only; it does not publish images or deploy the application.
 
+## Frontend
+
+The React, Vite, TypeScript, and Tailwind frontend is located in `frontend/` and connects to the deployed Cloud Run API through `VITE_API_BASE_URL`.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The local site is available at [http://localhost:5173](http://localhost:5173). To use a different backend, update `frontend/.env` or provide `VITE_API_BASE_URL` when starting or building the frontend.
+
+The backend applies CORS to `/api/**` and always allows `http://localhost:5173` for local development. Set `CORS_ALLOWED_ORIGINS` to the deployed frontend origin before deploying the backend, for example `https://cricket.example.com`. Multiple deployed origins can be supplied as a comma-separated list. Wildcard origins are rejected.
+
 ## Cloud Run Readiness
 
 The application honors Cloud Run's `PORT` environment variable and accepts database configuration through `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. For a production deployment, set `JPA_DDL_AUTO=validate`, `JPA_SHOW_SQL=false`, and an appropriate `DB_MAX_POOL_SIZE`; Cloud SQL connectivity is not configured yet.
