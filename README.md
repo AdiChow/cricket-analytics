@@ -1,5 +1,11 @@
 # cricket-analytics
 
+[![CI](https://github.com/AdiChow/cricket-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/AdiChow/cricket-analytics/actions/workflows/ci.yml)
+
+## Continuous Integration
+
+GitHub Actions runs `./mvnw verify` and builds the Docker image for every pull request and every push to `main`. The workflow validates the build only; it does not publish images or deploy the application.
+
 ## Docker Compose
 
 Start PostgreSQL and the application from the repository root:
