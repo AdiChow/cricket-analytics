@@ -12,3 +12,6 @@ spring:
       ddl-auto: update
 
     show-sql: true
+
+cricket:
+  import-on-startup: false

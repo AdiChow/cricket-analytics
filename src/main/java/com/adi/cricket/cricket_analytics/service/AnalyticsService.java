@@ -3,6 +3,7 @@ package com.adi.cricket.cricket_analytics.service;
 import com.adi.cricket.cricket_analytics.dto.BattingLeaderDto;
 import com.adi.cricket.cricket_analytics.dto.PlayerProfileDto;
 import com.adi.cricket.cricket_analytics.dto.PlayerSearchDto;
+import com.adi.cricket.cricket_analytics.exception.PlayerNotFoundException;
 import com.adi.cricket.cricket_analytics.repository.DeliveryRepository;
 import com.adi.cricket.cricket_analytics.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
@@ -64,16 +65,11 @@ public class AnalyticsService {
                         .getPlayerProfile(
                                 playerId
                         )
-                        .getFirst();
-
-        System.out.println(
-                "Row length = "
-                        + row.length
-        );
-
-        for (Object obj : row) {
-            System.out.println(obj);
-        }
+                        .stream()
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new PlayerNotFoundException(playerId)
+                        );
 
         long matches =
                 ((Number) row[2]).longValue();

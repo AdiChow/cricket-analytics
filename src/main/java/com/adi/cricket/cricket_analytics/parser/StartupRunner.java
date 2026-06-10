@@ -4,7 +4,9 @@ import com.adi.cricket.cricket_analytics.dto.CricsheetMatch;
 import com.adi.cricket.cricket_analytics.service.CricsheetImportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -12,6 +14,12 @@ import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
+@ConditionalOnProperty(
+        prefix = "cricket",
+        name = "import-on-startup",
+        havingValue = "true"
+)
 public class StartupRunner implements CommandLineRunner {
 
     private final CricsheetImportService importService;
@@ -26,14 +34,17 @@ public class StartupRunner implements CommandLineRunner {
                         name.endsWith(".json"));
 
         if (files == null) {
-            System.out.println(
-                    "No Cricsheet data folder found"
-            );
+            log.warn("Cricsheet data folder not found: {}", folder.getAbsolutePath());
 
             return;
         }
 
         Arrays.sort(files);
+        log.info(
+                "Cricsheet startup import enabled; processing {} files from {}",
+                files.length,
+                folder.getAbsolutePath()
+        );
 
         for(File file : files)
         {
@@ -47,5 +58,7 @@ public class StartupRunner implements CommandLineRunner {
 
             importService.importMatch(match, matchId);
         }
+
+        log.info("Cricsheet startup import completed; processed {} files", files.length);
     }
 }
