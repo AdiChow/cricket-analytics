@@ -2,6 +2,67 @@
 
 [![CI](https://github.com/AdiChow/cricket-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/AdiChow/cricket-analytics/actions/workflows/ci.yml)
 
+## Live Demo
+
+Frontend:
+https://your-vercel-url.vercel.app
+
+Backend API:
+https://cricket-analytics-68188355784.asia-south1.run.app
+
+Swagger:
+https://cricket-analytics-68188355784.asia-south1.run.app/swagger-ui.html
+
+---
+## Screenshots
+
+### Home
+
+![Home](docs/screenshots/)
+
+### Search Players
+
+![Search](docs/screenshots/search.png)
+
+### Player Profile
+
+![Player Profile](docs/screenshots/profile.png)
+
+### Batting Leaderboard
+
+![Leaderboard](docs/screenshots/leaderboard.png)
+
+## Overview
+
+Cricket Intelligence Platform is a backend-first cricket analytics application built using Spring Boot and PostgreSQL.
+
+The platform currently contains:
+
+- 903 Test matches
+- 1,484 players
+- 1.74M deliveries
+
+Key capabilities:
+
+- Player Search
+- Player Profile
+- Batting Analytics
+- Leaderboards
+- Cloud Deployment
+- Swagger API Documentation
+
+Tech Stack:
+
+- Spring Boot
+- PostgreSQL
+- React
+- Docker
+- GitHub Actions
+- Cloud Run
+- Cloud SQL
+
+---
+
 ## Continuous Integration
 
 GitHub Actions runs `./mvnw verify` and builds the Docker image for every pull request and every push to `main`. The workflow validates the build only; it does not publish images or deploy the application.
