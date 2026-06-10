@@ -1,0 +1,13 @@
+.git
+.github
+.idea
+target
+*.iml
+
+# Cricsheet downloads are external input and must not be packaged in the image.
+/*.json
+/*.zip
+/cricsheet
+/cricsheet-data
+/data
+/dataset

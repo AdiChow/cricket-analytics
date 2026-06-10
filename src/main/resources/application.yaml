@@ -3,9 +3,9 @@ spring:
     name: cricket-analytics
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/cricketdb
-    username: cricket
-    password: cricket
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cricketdb}
+    username: ${DB_USERNAME:cricket}
+    password: ${DB_PASSWORD:cricket}
 
   jpa:
     hibernate:
@@ -14,10 +14,19 @@ spring:
     show-sql: true
 
 cricket:
-  import-on-startup: false
+  import-on-startup: ${CRICKET_IMPORT_ON_STARTUP:false}
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

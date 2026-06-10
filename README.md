@@ -1,5 +1,19 @@
 # cricket-analytics
 
+## Docker Compose
+
+Start PostgreSQL and the application from the repository root:
+
+```bash
+docker compose up --build
+```
+
+The application is available at [http://localhost:8080](http://localhost:8080), and its health endpoint is available at [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health).
+
+Database settings can be overridden with `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`. The application port can be overridden with `APP_PORT`. Cricsheet import remains disabled in Docker Compose.
+
+Stop the services with `docker compose down`. The PostgreSQL data volume is retained unless `docker compose down -v` is used.
+
 ## API Documentation
 
 With the application running, Swagger UI is available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). The generated OpenAPI document is available at [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs).
