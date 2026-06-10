@@ -18,7 +18,7 @@ https://cricket-analytics-68188355784.asia-south1.run.app/swagger-ui.html
 
 ### Home
 
-![Home](docs/screenshots/)
+![Home](docs/screenshots/home.png)
 
 ### Search Players
 
