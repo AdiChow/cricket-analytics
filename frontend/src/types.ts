@@ -12,6 +12,11 @@ export interface PlayerProfile {
   strikeRate: number
 }
 
+export interface PlayerComparison {
+  player1: PlayerProfile
+  player2: PlayerProfile
+}
+
 export interface BattingLeader {
   playerId: number
   playerName: string

@@ -32,6 +32,12 @@ export function DashboardPage() {
               Search players
             </Link>
             <Link
+              to="/compare"
+              className="rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white hover:bg-white/10"
+            >
+              Compare players
+            </Link>
+            <Link
               to="/leaderboard"
               className="rounded-xl border border-white/20 px-5 py-3 text-sm font-bold text-white hover:bg-white/10"
             >

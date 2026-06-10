@@ -1,5 +1,6 @@
 import type {
   BattingLeader,
+  PlayerComparison,
   PlayerProfile,
   PlayerSearchResult,
 } from '../types'
@@ -56,4 +57,20 @@ export function searchPlayers(query: string, signal?: AbortSignal) {
 
 export function getPlayerProfile(playerId: string, signal?: AbortSignal) {
   return request<PlayerProfile>(`/api/stats/players/${playerId}`, signal)
+}
+
+export function comparePlayers(
+  player1Id: number,
+  player2Id: number,
+  signal?: AbortSignal,
+) {
+  const params = new URLSearchParams({
+    player1Id: player1Id.toString(),
+    player2Id: player2Id.toString(),
+  })
+
+  return request<PlayerComparison>(
+    `/api/stats/players/compare?${params.toString()}`,
+    signal,
+  )
 }

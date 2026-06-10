@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 const navigation = [
   { label: 'Dashboard', to: '/' },
   { label: 'Player Search', to: '/players' },
+  { label: 'Compare Players', to: '/compare' },
   { label: 'Leaderboard', to: '/leaderboard' },
 ]
 

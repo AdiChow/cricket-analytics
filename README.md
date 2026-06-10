@@ -18,6 +18,8 @@ npm run dev
 
 The local site is available at [http://localhost:5173](http://localhost:5173). To use a different backend, update `frontend/.env` or provide `VITE_API_BASE_URL` when starting or building the frontend.
 
+The frontend includes player search, player profiles, leaderboards, and a comparison page at `/compare`. Select two players there to load their profile statistics side by side from the live comparison API.
+
 The backend applies CORS to `/api/**` and always allows `http://localhost:5173` for local development. Set `CORS_ALLOWED_ORIGINS` to the deployed frontend origin before deploying the backend, for example `https://cricket.example.com`. Multiple deployed origins can be supplied as a comma-separated list. Wildcard origins are rejected.
 
 ## Cloud Run Readiness
