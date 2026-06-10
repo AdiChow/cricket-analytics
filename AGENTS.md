@@ -19,6 +19,56 @@ When trade-offs arise, prioritize:
 
 over frontend sophistication.
 
+---
+
+## Project Success Criteria
+
+The final project should demonstrate:
+
+- Spring Boot expertise
+- PostgreSQL expertise
+- API design
+- Testing
+- Docker
+- CI/CD
+- Cloud deployment
+- Redis caching
+- Event-Driven Architecture using Kafka
+- GenAI integration
+- Agentic workflows
+
+The project should be deployable, testable, and production-oriented.
+
+Every major feature should contribute to at least one of these goals.
+
+## Current Development Phase
+
+Current focus:
+
+Phase 1 - Core Backend
+
+Immediate priorities:
+
+1. Complete analytics APIs
+2. Add testing
+3. Add Docker
+4. Add Swagger/OpenAPI
+5. Add global exception handling
+
+Do not begin Kafka, Redis, GenAI, Agentic AI, or advanced frontend work unless explicitly requested.
+
+Current Status:
+
+- Cricsheet ingestion pipeline implemented
+- Match, Player, Team, MatchPlayer, Delivery entities implemented
+- PostgreSQL analytics database populated
+- Player Search API implemented
+- Player Profile API implemented
+- Top Batters Analytics implemented
+
+The agent should extend existing functionality rather than recreate it.
+
+---
 
 # Project Overview
 
@@ -103,7 +153,8 @@ Focus:
 
 Deliverables:
 
-* JUnit
+* JUnit 
+* README.md
 * Mockito
 * Spring Boot Test
 * Testcontainers
@@ -225,6 +276,20 @@ If not, challenge its necessity before implementation.
 
 ---
 
+## Documentation Rule
+
+Whenever a significant feature is added:
+
+- Update README.md
+- Add setup instructions
+- Add API examples
+- Add deployment instructions if applicable
+- Add testing instructions
+
+Documentation should remain current with the codebase.
+
+---
+
 # Codex Operating Rules
 
 ## Planning First
@@ -243,9 +308,11 @@ Never immediately modify code without understanding the task.
 
 ## Repository Scope
 
-Do not scan the entire repository unless required.
+Do not scan the entire repository by default.
 
-Inspect only relevant files first.
+Inspect only files relevant to the requested task.
+
+Request permission before performing repository-wide analysis or refactoring.
 
 Avoid repository-wide refactors.
 
@@ -299,6 +366,24 @@ Rules:
 * Follow REST conventions.
 * Use proper HTTP status codes.
 * Use centralized exception handling.
+
+---
+
+# API Design Guidelines
+
+Prefer:
+
+- Consistent response structures
+- Pagination for large datasets
+- Versionable APIs
+- DTO-based responses
+
+Avoid:
+
+- Exposing JPA entities directly
+- Inconsistent response formats
+- Breaking existing contracts
+
 
 ---
 
@@ -430,6 +515,29 @@ Deployment steps should always be documented.
 
 ---
 
+## Architecture Documentation
+
+Maintain documentation as the project evolves.
+
+For major architectural decisions:
+
+- Explain the problem
+- Explain the chosen solution
+- Explain alternatives considered
+- Explain tradeoffs
+
+Store decisions in docs/adr.
+
+Preferred structure:
+
+```text
+docs/
+├── architecture.md
+├── deployment.md
+└── adr/
+```
+---
+
 # Redis Caching Guidelines
 
 Introduce caching only when justified.
@@ -493,6 +601,7 @@ GenAI must not:
 * Replace database queries
 
 Data must originate from backend services.
+Prefer Retrieval-Augmented Generation (RAG) using project data over hallucinated responses.
 
 ---
 
@@ -527,7 +636,6 @@ To reduce token usage:
 * Avoid rewriting entire files when small changes are sufficient.
 * Reuse existing implementations.
 * Prefer incremental improvements.
-* Avoid generating unnecessary documentation unless requested.
 
 ---
 
@@ -554,13 +662,13 @@ Do not skip foundational layers for advanced technologies.
 
 A task is complete only when:
 
-* Code compiles
-* Tests pass
-* APIs work
-* Documentation updated
-* Docker setup works
-* No unrelated code modified
-* Changes summarized
-* Testing instructions provided
+- Code compiles
+- Tests pass
+- APIs work
+- Documentation updated
+- Docker setup works
+- No unrelated code modified
+- Changes summarized
+- Testing instructions provided
 
 Never trade maintainability for speed.
