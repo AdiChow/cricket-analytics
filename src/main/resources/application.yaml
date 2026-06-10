@@ -35,3 +35,8 @@ management:
   endpoint:
     health:
       show-details: never
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+    deployed-origins: ${CORS_ALLOWED_ORIGINS:}
