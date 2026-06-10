@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,6 +45,128 @@ class AnalyticsControllerTest {
                 .andExpect(jsonPath("$.runs").value(500))
                 .andExpect(jsonPath("$.ballsFaced").value(400))
                 .andExpect(jsonPath("$.strikeRate").value(125.0));
+    }
+
+    @Test
+    void returnsPlayerComparison() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of(
+                53L, Optional.of(playerProfile(
+                        53L,
+                        "V Kohli",
+                        121L,
+                        9230L,
+                        16655L
+                )),
+                49L, Optional.of(playerProfile(
+                        49L,
+                        "SPD Smith",
+                        118L,
+                        10763L,
+                        20031L
+                ))
+        ));
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player1Id", "53")
+                        .param("player2Id", "49"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.player1.playerId").value(53))
+                .andExpect(jsonPath("$.player1.playerName").value("V Kohli"))
+                .andExpect(jsonPath("$.player1.matches").value(121))
+                .andExpect(jsonPath("$.player1.runs").value(9230))
+                .andExpect(jsonPath("$.player1.ballsFaced").value(16655))
+                .andExpect(jsonPath("$.player1.strikeRate").value(55.42))
+                .andExpect(jsonPath("$.player2.playerId").value(49))
+                .andExpect(jsonPath("$.player2.playerName").value("SPD Smith"))
+                .andExpect(jsonPath("$.player2.matches").value(118))
+                .andExpect(jsonPath("$.player2.runs").value(10763))
+                .andExpect(jsonPath("$.player2.ballsFaced").value(20031))
+                .andExpect(jsonPath("$.player2.strikeRate").value(53.73));
+    }
+
+    @Test
+    void returnsBadRequestWhenFirstComparisonIdIsMissing() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of());
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player2Id", "49"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.path").value("/api/stats/players/compare"));
+    }
+
+    @Test
+    void returnsBadRequestWhenSecondComparisonIdIsMissing() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of());
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player1Id", "53"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").isNotEmpty())
+                .andExpect(jsonPath("$.path").value("/api/stats/players/compare"));
+    }
+
+    @Test
+    void returnsBadRequestWhenComparisonIdsAreTheSame() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of());
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player1Id", "53")
+                        .param("player2Id", "53"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.message")
+                        .value("player1Id and player2Id must be different"))
+                .andExpect(jsonPath("$.path").value("/api/stats/players/compare"));
+    }
+
+    @Test
+    void returnsNotFoundWhenFirstComparedPlayerDoesNotExist() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of(
+                49L, Optional.of(playerProfile(
+                        49L,
+                        "SPD Smith",
+                        118L,
+                        10763L,
+                        20031L
+                ))
+        ));
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player1Id", "53")
+                        .param("player2Id", "49"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.message").value("Player not found with id 53"))
+                .andExpect(jsonPath("$.path").value("/api/stats/players/compare"));
+    }
+
+    @Test
+    void returnsNotFoundWhenSecondComparedPlayerDoesNotExist() throws Exception {
+        MockMvc mockMvc = createMockMvc(Map.of(
+                53L, Optional.of(playerProfile(
+                        53L,
+                        "V Kohli",
+                        121L,
+                        9230L,
+                        16655L
+                ))
+        ));
+
+        mockMvc.perform(get("/api/stats/players/compare")
+                        .param("player1Id", "53")
+                        .param("player2Id", "49"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.message").value("Player not found with id 49"))
+                .andExpect(jsonPath("$.path").value("/api/stats/players/compare"));
     }
 
     @Test
@@ -155,7 +278,7 @@ class AnalyticsControllerTest {
             List<BattingLeaderProjection> battingLeaders,
             List<PlayerSearchProjection> searchResults
     ) {
-        DeliveryRepository deliveryRepository = deliveryRepository((methodName) -> {
+        DeliveryRepository deliveryRepository = deliveryRepository((methodName, arguments) -> {
             if ("getPlayerProfile".equals(methodName)) {
                 return profileRow;
             }
@@ -168,6 +291,23 @@ class AnalyticsControllerTest {
         PlayerRepository playerRepository = playerRepository(searchResults);
 
         return createMockMvc(deliveryRepository, playerRepository);
+    }
+
+    private MockMvc createMockMvc(
+            Map<Long, Optional<PlayerProfileProjection>> profileRows
+    ) {
+        DeliveryRepository deliveryRepository = deliveryRepository((methodName, arguments) -> {
+            if ("getPlayerProfile".equals(methodName)) {
+                return profileRows.getOrDefault(
+                        (Long) arguments[0],
+                        Optional.empty()
+                );
+            }
+
+            throw new UnsupportedOperationException("Unexpected repository method: " + methodName);
+        });
+
+        return createMockMvc(deliveryRepository, null);
     }
 
     private PlayerProfileProjection playerProfile(
@@ -252,7 +392,7 @@ class AnalyticsControllerTest {
     }
 
     private MockMvc createMockMvc(RuntimeException repositoryFailure) {
-        DeliveryRepository deliveryRepository = deliveryRepository((methodName) -> {
+        DeliveryRepository deliveryRepository = deliveryRepository((methodName, arguments) -> {
             throw repositoryFailure;
         });
 
@@ -281,7 +421,10 @@ class AnalyticsControllerTest {
         return (DeliveryRepository) Proxy.newProxyInstance(
                 DeliveryRepository.class.getClassLoader(),
                 new Class<?>[]{DeliveryRepository.class},
-                (proxy, method, arguments) -> methodHandler.invoke(method.getName())
+                (proxy, method, arguments) -> methodHandler.invoke(
+                        method.getName(),
+                        arguments
+                )
         );
     }
 
@@ -306,6 +449,6 @@ class AnalyticsControllerTest {
     @FunctionalInterface
     private interface RepositoryMethodHandler {
 
-        Object invoke(String methodName);
+        Object invoke(String methodName, Object[] arguments);
     }
 }

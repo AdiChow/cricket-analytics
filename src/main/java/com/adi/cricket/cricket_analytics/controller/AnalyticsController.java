@@ -1,6 +1,7 @@
 package com.adi.cricket.cricket_analytics.controller;
 
 import com.adi.cricket.cricket_analytics.dto.BattingLeaderDto;
+import com.adi.cricket.cricket_analytics.dto.PlayerComparisonDto;
 import com.adi.cricket.cricket_analytics.dto.PlayerProfileDto;
 import com.adi.cricket.cricket_analytics.dto.PlayerSearchDto;
 import com.adi.cricket.cricket_analytics.service.AnalyticsService;
@@ -52,6 +53,26 @@ public class AnalyticsController {
                 .getPlayerProfile(
                         playerId
                 );
+    }
+    @GetMapping("/players/compare")
+    @Operation(
+            summary = "Compare two players",
+            description = "Returns the existing batting profile statistics for two different players side by side."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Player comparison returned"),
+            @ApiResponse(responseCode = "400", description = "Missing, invalid, or identical player IDs"),
+            @ApiResponse(responseCode = "404", description = "One of the players was not found"),
+            @ApiResponse(responseCode = "500", description = "Unexpected server error")
+    })
+    public PlayerComparisonDto comparePlayers(
+            @Parameter(description = "First player database ID", example = "53", required = true)
+            @RequestParam Long player1Id,
+            @Parameter(description = "Second player database ID", example = "49", required = true)
+            @RequestParam Long player2Id
+    ) {
+
+        return analyticsService.comparePlayers(player1Id, player2Id);
     }
     @GetMapping("/players/search")
     @Operation(
