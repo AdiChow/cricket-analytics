@@ -9,9 +9,12 @@ import com.adi.cricket.cricket_analytics.exception.InvalidPlayerComparisonExcept
 import com.adi.cricket.cricket_analytics.exception.PlayerNotFoundException;
 import com.adi.cricket.cricket_analytics.repository.DeliveryRepository;
 import com.adi.cricket.cricket_analytics.repository.PlayerRepository;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,7 +24,10 @@ public class AnalyticsService {
 
     private final DeliveryRepository deliveryRepository;
     private final PlayerRepository playerRepository;
+    private static final Tracer tracer =
+            GlobalOpenTelemetry.getTracer("cricket-analytics");
 
+    @WithSpan("analytics.get-top-batters")
     public List<BattingLeaderDto> getTopBatters() {
 
         return deliveryRepository
@@ -54,10 +60,14 @@ public class AnalyticsService {
             );
         }).toList();
     }
+    @WithSpan("analytics.get-player-profile")
     public PlayerProfileDto getPlayerProfile(
             Long playerId
     ) {
-
+        Span.current().setAttribute(
+                "player.id",
+                playerId
+        );
         PlayerProfileProjection row =
                 deliveryRepository
                         .getPlayerProfile(
@@ -66,6 +76,7 @@ public class AnalyticsService {
                         .orElseThrow(() ->
                                 new PlayerNotFoundException(playerId)
                         );
+
 
         long matches =
                 row.getMatches();
@@ -76,15 +87,23 @@ public class AnalyticsService {
         long balls =
                 row.getBallsFaced();
 
-        double strikeRate =
-                balls == 0
-                        ? 0
-                        : (runs * 100.0) / balls;
+        Span span = tracer.spanBuilder("calculate-strike-rate").startSpan();
+        double strikeRate;
+        try {
+            // calculation
+            strikeRate=
+                    balls == 0
+                            ? 0
+                            : (runs * 100.0) / balls;
 
-        strikeRate =
-                Math.round(
-                        strikeRate * 100
-                ) / 100.0;
+            strikeRate =
+                    Math.round(
+                            strikeRate * 100
+                    ) / 100.0;
+        } finally {
+            span.end();
+        }
+
 
         return new PlayerProfileDto(
                 row.getPlayerId(),
@@ -95,11 +114,13 @@ public class AnalyticsService {
                 strikeRate
         );
     }
+    @WithSpan("analytics.compare-players")
     public PlayerComparisonDto comparePlayers(
             Long player1Id,
             Long player2Id
     ) {
-
+        Span.current().setAttribute("player1.id", player1Id);
+        Span.current().setAttribute("player2.id", player2Id);
         if (Objects.equals(player1Id, player2Id)) {
             throw new InvalidPlayerComparisonException();
         }
@@ -109,6 +130,7 @@ public class AnalyticsService {
                 getPlayerProfile(player2Id)
         );
     }
+    @WithSpan("analytics.search-players")
     public List<PlayerSearchDto> searchPlayers(
             String searchTerm
     ) {

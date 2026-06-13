@@ -26,6 +26,13 @@ services:
       DB_USERNAME: ${POSTGRES_USER:-cricket}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-cricket}
       CRICKET_IMPORT_ON_STARTUP: "false"
+      JAVA_TOOL_OPTIONS: "-javaagent:/otel/opentelemetry-javaagent.jar"
+      OTEL_SERVICE_NAME: "cricket-analytics"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://host.docker.internal:4318"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+    volumes:
+      - ./opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+
     ports:
       - "${APP_PORT:-8080}:8080"
     depends_on:
