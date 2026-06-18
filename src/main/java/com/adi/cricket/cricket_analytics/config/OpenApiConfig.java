@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(
                 title = "Cricket Intelligence Platform API",
-                description = "REST API for player search, player profiles, and batting analytics.",
+                description = "REST API for player search, player profiles, batting analytics, and grounded AI explanations.",
                 version = "v1"
         )
 )
