@@ -48,7 +48,6 @@ Key capabilities:
 - Player Profile
 - Batting Analytics
 - Leaderboards
-- Grounded AI Player Comparison
 - Cloud Deployment
 - Swagger API Documentation
 
@@ -111,22 +110,6 @@ Compare two player profiles with:
 ```text
 GET /api/stats/players/compare?player1Id=53&player2Id=49
 ```
-
-Generate a grounded natural-language comparison with:
-
-```text
-POST /api/ai/compare-players
-```
-
-```json
-{
-  "question": "Compare Kohli and Smith"
-}
-```
-
-Set `AI_API_KEY` to enable provider-generated summaries. When it is absent or the provider call fails, the endpoint still returns verified statistics with a deterministic fallback summary. Optional configuration includes `AI_MODEL` (default `gpt-5.4-mini`), `AI_BASE_URL`, `AI_CONNECT_TIMEOUT`, `AI_READ_TIMEOUT`, and `AI_MAX_OUTPUT_TOKENS`.
-
-See [AI Player Comparison](docs/ai-player-comparison.md) for the request flow, matching rules, prompt constraints, fallback behavior, and manual test cases.
 
 ## Known Limitation
 

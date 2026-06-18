@@ -44,18 +44,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidAiComparisonException.class)
-    public ResponseEntity<ApiErrorResponse> handleInvalidAiComparison(
-            InvalidAiComparisonException exception,
-            HttpServletRequest request
-    ) {
-        return buildResponse(
-                HttpStatus.BAD_REQUEST,
-                exception.getMessage(),
-                request.getRequestURI()
-        );
-    }
-
     @Override
     protected ResponseEntity<Object> handleTypeMismatch(
             TypeMismatchException exception,
